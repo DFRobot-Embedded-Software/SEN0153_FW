@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "main.h": "c",
+        "apm32f0xx_usart.h": "c",
+        "apm32f0xx_rcm.h": "c",
+        "apm32f0xx_eint.h": "c",
+        "func.h": "c",
+        "apm32f0xx_misc.h": "c",
+        "df_protocol.h": "c",
+        "all_include.h": "c",
+        "setup.h": "c",
+        "apm32f0xx_adc.h": "c",
+        "apm32f0xx_comp.h": "c",
+        "apm32f0xx_dac.h": "c",
+        "apm32f0xx_syscfg.h": "c"
+    }
+}
