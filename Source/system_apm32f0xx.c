@@ -25,6 +25,7 @@
 
 /* Includes */
 #include "apm32f0xx.h"
+#include "main.h"
 
 /** @addtogroup Examples
   @{
@@ -45,8 +46,8 @@
 
 // #define VECT_TAB_SRAM
 
-// #define VECT_TAB_OFFSET       0x2000   // 这里可以完成中断向量表的偏移
-#define VECT_TAB_OFFSET       0x00
+#define VECT_TAB_OFFSET       APPLICATION_ADDRESS   // 这里可以完成中断向量表的偏移
+// #define VECT_TAB_OFFSET       0x00
 
 /**@} end of group USART_Interrupt_System_Macros*/
 

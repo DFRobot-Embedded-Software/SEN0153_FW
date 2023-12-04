@@ -3,6 +3,7 @@
 revBufTypeDef revBuf;
 
 union RxMessage_t   RxMessage;
+
 void DF_Protocol_Parse(void)
 {
   if (Load_RxMessage() == TRUE) { //-------------------------------------------验证指令是否正确
@@ -75,7 +76,6 @@ uint8_t Ret_Checksum_Cal(RetMessage_TypeDef aa)
   return (uint8_t)Ret_Checksum_Temp;
 }
 
-
 void Return_GetDis(uint16_t Distance_Val)
 {
   RetMessage_TypeDef RetMessage_t = { .get_Dis_RET = get_Dis_RET_DEFAULT };
@@ -87,6 +87,7 @@ void Return_GetDis(uint16_t Distance_Val)
 
   USART_Write(RetMessage_t.Buffer, get_Dis_RET_numByte);
 }
+
 void Return_GetTemp(uint16_t Temperature_Val)
 {
   RetMessage_TypeDef RetMessage_t = { .get_Temp_RET = get_Temp_RET_DEFAULT };
@@ -99,6 +100,7 @@ void Return_GetTemp(uint16_t Temperature_Val)
 
   USART_Write(RetMessage_t.Buffer, get_Temp_RET_numByte);
 }
+
 void Return_SetAddr(uint8_t SetAddr_Status)
 {
   uint8_t tem_Status = 0xEE;
@@ -126,4 +128,3 @@ void Return_SetBand(uint8_t SetBand_Status)
   USART_Write(RetMessage_t.Buffer, set_Band_RET_numByte);
   while (USART_ReadStatusFlag(USART1, USART_FLAG_TXBE) == RESET);
 }
-

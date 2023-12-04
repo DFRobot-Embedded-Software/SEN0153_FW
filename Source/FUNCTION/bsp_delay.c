@@ -25,7 +25,6 @@
 
  /* Includes */
 #include "bsp_delay.h"
-#include "apm32f0xx_misc.h"
 
 /** @addtogroup Board
   @{

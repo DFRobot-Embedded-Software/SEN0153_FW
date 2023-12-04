@@ -1,19 +1,35 @@
 #ifndef __ALL_INCLUDE_H__
+#define __ALL_INCLUDE_H__
 
 #include "main.h"
-
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
 
 #include "setup.h"
 #include "DF_Protocol.h"
 #include "func.h"
+#include "flash.h"
 
-// #define COMP_INVERTINGINPUT_TH_VOLT(x)   ( (uint16_t)((x) * 0.3788 * 8) )   // 1250 / 3300
-#define COMP_INVERTINGINPUT_TH_VOLT(x)   ( (uint16_t)((x) * 1250 / 3300 ) )   // 1.25V 范围的 1200/4096
-// #define COMP_INVERTINGINPUT_TH_VOLT(x)   ( (uint16_t)((x) * 4096.0 / 3300 ) )   // 1200 mV
-// #define COMP_INVERTINGINPUT_TH_VOLT(x)   ( x )   // 1200
+#define THIS_USE_TMR1
+#ifdef THIS_USE_TMR1
+#define COMP_OUTPUT_SET   COMP_OUTPUT_TIM1IC1
+#define USE_TMRx   TMR1
+#define TIMERx_setup(x, y)   {TIMER1_setup(x, y);}
+#else
+#define COMP_OUTPUT_SET   COMP_OUTPUT_TIM2IC4
+#define USE_TMRx   TMR2
+#define TIMERx_setup(x, y)   {TIMER2_setup(x, y);}
+#endif
+
+#define COMP_INVERTINGINPUT_TH_VOLT(x)   ( (uint16_t)((x) * 4096.0 / 3.3 ) )
+
+// #define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 0.3788 * 8) )   // 1250 / 3300
+#define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 1250 / 3300 * 3) )   // 1.25V 范围的 1200/4096
+// #define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 4096.0 / 3300 ) )   // 1200 mV
+// #define COMP_INPUT_TH(x)   ( x )   // 1200
+
+// #define SET_DAC_INM(x)   {DAC_ConfigChannel1Data(DAC_ALIGN_12B_R, COMP_INPUT_TH(x));}
+// #define SET_DAC_INM(x)   
+#define SET_DAC_INM(x)   {DAC->DH12R1 = COMP_INPUT_TH(x);}
+// #define SET_DAC_INM(x)   {DAC->DH12R1 = x;}
 
 #define Baudrate_DEFAULT       19200
 #define device_Addr_DEFAULT    0x11
@@ -24,6 +40,27 @@
 
 #define TRUE    ((uint8_t)1)
 #define FALSE   ((uint8_t)0)
+
+#define GPIO_SetInputFloat(GPIOx, Pinx)   {\
+                                            gpioConfig.mode  = GPIO_MODE_IN;\
+                                            gpioConfig.speed = GPIO_SPEED_50MHz;\
+                                            gpioConfig.outtype = GPIO_OUT_TYPE_PP;\
+                                            gpioConfig.pupd  = GPIO_PUPD_NO;\
+                                            gpioConfig.pin   = Pinx;\
+                                            \
+                                            GPIO_Config(GPIOx, &gpioConfig);\
+                                          }
+
+#define GPIO_SetOutPP(GPIOx, Pinx)        {\
+                                            gpioConfig.mode  = GPIO_MODE_OUT;\
+                                            gpioConfig.speed = GPIO_SPEED_50MHz;\
+                                            gpioConfig.outtype = GPIO_OUT_TYPE_PP;\
+                                            gpioConfig.pupd  = GPIO_PUPD_NO;\
+                                            gpioConfig.pin   = Pinx;\
+                                            \
+                                            GPIO_Config(GPIOx, &gpioConfig);\
+                                            GPIOx->BR = Pinx;\
+                                          }
 
 /*****************************************************************************************************************
  *超声波探头用到的IO口:  输入IO----PB3
@@ -95,21 +132,14 @@
 #define USART1_RX_PIN    GPIO_PIN_7
 
 
-extern uint16_t Temp;
-extern volatile uint16_t Timer3_IF;
-
 extern uint32_t Baudrate;
 extern uint8_t  device_Addr;
 
-extern volatile uint8_t CMD_Switch;   // 好像没有用
-extern volatile uint8_t Var_Switch;   // 好像没有用 并且没有定义
 extern volatile uint32_t Vspeed;   // 单位为cm/s
-extern volatile uint8_t IRQ_Counter;
-extern volatile uint8_t DisTrue_Flag;   // 距离获取正确的标志
-extern volatile uint8_t LEU0_RX_Time;   // 开启Systick等待数据接收完成
 
-extern volatile uint16_t TIMER2_IF_Counter;
+extern volatile uint16_t TIMERx_IF_Counter;
 extern volatile uint16_t TIMER3_IF_Counter;
 extern volatile uint16_t Distance;
+extern volatile uint8_t DisTrue_Flag;   // 距离获取正确的标志
 
 #endif /* __ALL_INCLUDE_H__ */

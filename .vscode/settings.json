@@ -12,6 +12,8 @@
         "apm32f0xx_adc.h": "c",
         "apm32f0xx_comp.h": "c",
         "apm32f0xx_dac.h": "c",
-        "apm32f0xx_syscfg.h": "c"
+        "apm32f0xx_syscfg.h": "c",
+        "bsp_delay.h": "c",
+        "flash.h": "c"
     }
 }

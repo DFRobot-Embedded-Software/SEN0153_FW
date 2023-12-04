@@ -2,6 +2,9 @@
 .\out\apm32f051\func.o: ..\..\Include\func.h
 .\out\apm32f051\func.o: ..\..\Include\all_include.h
 .\out\apm32f051\func.o: ..\..\Include\main.h
+.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\out\apm32f051\func.o: D:\Keil_v5\ARM\Pack\Geehy\APM32F0xx_DFP\1.0.9\Device\Device\Geehy\APM32F0xx\Include\apm32f0xx.h
 .\out\apm32f051\func.o: ..\..\CMSIS\Include\core_cm0plus.h
 .\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
@@ -21,13 +24,8 @@
 .\out\apm32f051\func.o: ..\..\APM32F0xx_StdPeriphDriver\inc\apm32f0xx_eint.h
 .\out\apm32f051\func.o: ..\..\Include\bsp_delay.h
 .\out\apm32f051\func.o: ..\..\Include\main.h
-.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\out\apm32f051\func.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\out\apm32f051\func.o: ..\..\Include\setup.h
-.\out\apm32f051\func.o: ..\..\Include\all_include.h
-.\out\apm32f051\func.o: ..\..\Include\setup.h
-.\out\apm32f051\func.o: ..\..\Include\DF_Protocol.h
 .\out\apm32f051\func.o: ..\..\Include\all_include.h
 .\out\apm32f051\func.o: ..\..\Include\DF_Protocol.h
 .\out\apm32f051\func.o: ..\..\Include\func.h
+.\out\apm32f051\func.o: ..\..\Include\flash.h

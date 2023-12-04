@@ -1,5 +1,59 @@
 #include "setup.h"
 
+GPIO_Config_T gpioConfig;
+
+/*******************************************************************************
+* Description    : 初始化TIMER3
+* 声速约: 34000 cm/s
+* 1cm 大约需要: 29.4 us
+* 声波往返: 58.8 us
+
+  // 48000000 / 48 = 1000000 Hz   =   1 us
+  // 1 us * 4800 = 4800 us
+  // TIMER2_setup(4800, 48);   // 4.8ms
+*******************************************************************************/
+void TIMER1_setup(uint16_t period, uint16_t div)
+{
+  /* Enable Clock*/
+  RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_TMR1);
+
+  TMR_TimeBase_T  timeBaseConfig;
+  /* Set clockDivision = 1 */
+  timeBaseConfig.clockDivision = TMR_CKD_DIV1;   // 为什么测试没发现区别
+  /* Up-counter */
+  timeBaseConfig.counterMode = TMR_COUNTER_MODE_UP;
+  /* Set divider */
+  timeBaseConfig.div = div - 1;
+  /* Set counter = 0xffff */
+  timeBaseConfig.period = period - 1;
+  /* Repetition counter = 0x0 */
+  timeBaseConfig.repetitionCounter = 0;
+  TMR_ConfigTimeBase(TMR1, &timeBaseConfig);
+
+  TMR_ICConfig_T icConfig;
+  icConfig.channel = TMR_CHANNEL_1;
+  icConfig.ICpolarity = TMR_IC_POLARITY_RISING;   // 上升沿触发
+  icConfig.ICselection = TMR_IC_SELECTION_DIRECT_TI;
+  icConfig.ICprescaler = TMR_ICPSC_DIV1;   // 不分频
+  icConfig.ICfilter = 0;   // 不使用输入捕获滤波
+  TMR_ICConfig(TMR1, &icConfig);
+
+  TMR_EnableCCxChannel(TMR1, TMR_CHANNEL_1);
+  // TMR_DisableCCxChannel(TMR1, TMR_CHANNEL_1);
+
+  TMR_ClearIntFlag(TMR1, TMR_INT_FLAG_UPDATE | TMR_INT_FLAG_CH1);   // 在这里清除中断标志，才会使中断不会误触发一次
+  TMR_EnableInterrupt(TMR1, TMR_INT_UPDATE | TMR_INT_CH1);
+  // TMR_DisableInterrupt(TMR1, TMR_INT_UPDATE | TMR_INT_CH1);
+
+  NVIC_EnableIRQRequest(TMR1_CC_IRQn, 2);
+  NVIC_EnableIRQRequest(TMR1_BRK_UP_TRG_COM_IRQn, 2);
+  // NVIC_DisableIRQRequest(TMR1_IRQn);
+
+  // TMR_Enable(TMR1);
+  TMR_Disable(TMR1);
+
+}
+
 /*******************************************************************************
 * Description    : 初始化TIMER3
 * 声速约: 34000 cm/s
@@ -28,10 +82,6 @@ void TIMER2_setup(uint16_t period, uint16_t div)
   timeBaseConfig.repetitionCounter = 0;
   TMR_ConfigTimeBase(TMR2, &timeBaseConfig);
 
-  /*  Enable TMR2  */
-  // TMR_Enable(TMR2);
-  TMR_Disable(TMR2);
-
   TMR_ICConfig_T icConfig;
   icConfig.channel = TMR_CHANNEL_4;
   icConfig.ICpolarity = TMR_IC_POLARITY_RISING;   // 上升沿触发
@@ -40,17 +90,18 @@ void TIMER2_setup(uint16_t period, uint16_t div)
   icConfig.ICfilter = 0;   // 不使用输入捕获滤波
   TMR_ICConfig(TMR2, &icConfig);
 
-  // TMR_EnableCCxChannel(TMR2, TMR_CHANNEL_4);
-  TMR_DisableCCxChannel(TMR2, TMR_CHANNEL_4);
+  TMR_EnableCCxChannel(TMR2, TMR_CHANNEL_4);
+  // TMR_DisableCCxChannel(TMR2, TMR_CHANNEL_4);
 
-  /* Enable update interrupt*/
-  // TMR_EnableInterrupt(TMR2, TMR_INT_UPDATE | TMR_INT_CH4);
-  TMR_DisableInterrupt(TMR2, TMR_INT_UPDATE | TMR_INT_CH4);
+  TMR_ClearIntFlag(TMR2, TMR_INT_FLAG_UPDATE | TMR_INT_FLAG_CH4);
+  TMR_EnableInterrupt(TMR2, TMR_INT_UPDATE | TMR_INT_CH4);   // Enable update interrupt
+  // TMR_DisableInterrupt(TMR2, TMR_INT_UPDATE | TMR_INT_CH4);
 
-  // NVIC_EnableIRQRequest(TMR2_IRQn, 2);
-  // TMR_ClearIntFlag(TMR2, TMR_INT_FLAG_UPDATE | TMR_INT_FLAG_CH4);
-  NVIC_DisableIRQRequest(TMR2_IRQn);
+  NVIC_EnableIRQRequest(TMR2_IRQn, 2);   // 测距计时最优先
+  // NVIC_DisableIRQRequest(TMR2_IRQn);
 
+  // TMR_Enable(TMR2);   // Enable TMR2
+  TMR_Disable(TMR2);
 }
 
 /*******************************************************************************
@@ -81,10 +132,6 @@ void TIMER3_setup(uint16_t period, uint16_t div)
   timeBaseConfig.repetitionCounter = 0;
   TMR_ConfigTimeBase(TMR3, &timeBaseConfig);
 
-  /*  Enable TMR2  */
-  // TMR_Enable(TMR2);
-  TMR_Disable(TMR2);
-
   // TMR_ICConfig_T icConfig;
   // icConfig.channel = TMR_CHANNEL_1;
   // icConfig.ICpolarity = TMR_IC_POLARITY_RISING;  // 上升沿触发
@@ -93,15 +140,18 @@ void TIMER3_setup(uint16_t period, uint16_t div)
   // icConfig.ICfilter = 0;  // 不使用输入捕获滤波
   // TMR_ICConfig(TMR3, &icConfig);
 
+  // TMR_EnableCCxChannel(TMR3, TMR_CHANNEL_1);
   // TMR_DisableCCxChannel(TMR3, TMR_CHANNEL_1);
 
-  /* Enable update interrupt*/
-  // TMR_EnableInterrupt(TMR3, TMR_INT_UPDATE);
-  TMR_DisableInterrupt(TMR3, TMR_INT_UPDATE);
+  TMR_ClearIntFlag(TMR3, TMR_INT_FLAG_UPDATE);
+  TMR_EnableInterrupt(TMR3, TMR_INT_UPDATE);
+  // TMR_DisableInterrupt(TMR3, TMR_INT_UPDATE);
 
-  // NVIC_EnableIRQRequest(TMR3_IRQn, 2);
-  // TMR_ClearIntFlag(TMR2, TMR_INT_FLAG_UPDATE);
-  NVIC_DisableIRQRequest(TMR3_IRQn);
+  NVIC_EnableIRQRequest(TMR3_IRQn, 2);
+  // NVIC_DisableIRQRequest(TMR3_IRQn);
+
+  // TMR_Enable(TMR3);
+  TMR_Disable(TMR3);
 }
 
 /*!
@@ -131,6 +181,7 @@ void APM_EVAL_TMR14_Init(uint16_t period, uint16_t div)
   TMR_ConfigTimeBase(TMR14, &timeBaseConfig);
 
   /* Enable update interrupt*/
+  TMR_ClearIntFlag(TMR14, TMR_INT_FLAG_UPDATE);
   TMR_EnableInterrupt(TMR14, TMR_INT_UPDATE);
   NVIC_EnableIRQRequest(TMR14_IRQn, 2);
 
@@ -147,8 +198,6 @@ void APM_EVAL_TMR14_Init(uint16_t period, uint16_t div)
 *******************************************************************************/
 void GPIO_setup(void)
 {
-  GPIO_Config_T  gpioConfig;
-
   /* Enable GPIO clock */
   RCM_EnableAHBPeriphClock(RCM_AHB_PERIPH_GPIOA);
   RCM_EnableAHBPeriphClock(RCM_AHB_PERIPH_GPIOB);
@@ -161,21 +210,17 @@ void GPIO_setup(void)
   gpioConfig.pupd = GPIO_PUPD_NO;
   gpioConfig.pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15;
   GPIO_Config(GPIOA, &gpioConfig);
-  // GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
-  GPIO_ClearBit(GPIOA, GPIO_PIN_8);
-  GPIO_ClearBit(GPIOA, GPIO_PIN_9);
-  GPIO_ClearBit(GPIOA, GPIO_PIN_10);
-  GPIO_ClearBit(GPIOA, GPIO_PIN_15);
+  GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
+  GPIO_SetBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
+  GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10);
   gpioConfig.pin = GPIO_PIN_4;
   GPIO_Config(GPIOB, &gpioConfig);
   GPIO_ClearBit(GPIOB, GPIO_PIN_4);
+  GPIO_SetBit(GPIOB, GPIO_PIN_4);
 
   //-----LED端口配置
-  gpioConfig.pin = LED_PIN;
-  gpioConfig.mode = GPIO_MODE_OUT;
   gpioConfig.outtype = GPIO_OUT_TYPE_PP;
-  gpioConfig.speed = GPIO_SPEED_50MHz;
-  gpioConfig.pupd = GPIO_PUPD_NO;
+  gpioConfig.pin = LED_PIN;
   GPIO_Config(LED_PORT, &gpioConfig);
   GPIO_ClearBit(LED_PORT, LED_PIN);
   // GPIO_SetBit(LED_PORT, LED_PIN);
@@ -205,30 +250,26 @@ void GPIO_setup(void)
 *******************************************************************************/
 void USART1_Init(void)
 {
-  GPIO_Config_T gpioConfigStruct;
-  USART_Config_T usartConfigStruct;
-
-  /* Enable USART1 clock */
-  RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_USART1);
-
   /* Connect PXx to USARTx_Tx */
   GPIO_ConfigPinAF(USART1_TX_PORT, GPIO_PIN_SOURCE_6, GPIO_AF_PIN0);
-
   /* Connect PXx to USARRX_Rx */
   GPIO_ConfigPinAF(USART1_RX_PORT, GPIO_PIN_SOURCE_7, GPIO_AF_PIN0);
 
   /* Configure USART Tx as alternate function push-pull */
-  gpioConfigStruct.mode = GPIO_MODE_AF;
-  gpioConfigStruct.pin = USART1_TX_PIN;
-  gpioConfigStruct.speed = GPIO_SPEED_50MHz;
-  gpioConfigStruct.outtype = GPIO_OUT_TYPE_PP;
-  gpioConfigStruct.pupd = GPIO_PUPD_PU;
-  GPIO_Config(USART1_TX_PORT, &gpioConfigStruct);
-
+  gpioConfig.mode = GPIO_MODE_AF;
+  gpioConfig.pin = USART1_TX_PIN;
+  gpioConfig.speed = GPIO_SPEED_50MHz;
+  gpioConfig.outtype = GPIO_OUT_TYPE_PP;
+  gpioConfig.pupd = GPIO_PUPD_PU;
+  GPIO_Config(USART1_TX_PORT, &gpioConfig);
   /* Configure USART Rx as input floating */
-  gpioConfigStruct.pin = USART1_RX_PIN;
-  GPIO_Config(USART1_RX_PORT, &gpioConfigStruct);
+  gpioConfig.pin = USART1_RX_PIN;
+  GPIO_Config(USART1_RX_PORT, &gpioConfig);
 
+  /* Enable USART1 clock */
+  RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_USART1);
+
+  USART_Config_T usartConfigStruct;
   /* USARTs configured as follow: */
   usartConfigStruct.baudRate = Baudrate;
   /* Receive and transmit enabled  */
@@ -245,6 +286,7 @@ void USART1_Init(void)
   USART_Config(USART1, &usartConfigStruct);
 
   /* Enable USART_Interrupt_RXBNEIE */
+  USART_RxData(USART1);
   USART_EnableInterrupt(USART1, USART_INT_RXBNEIE);
 
   NVIC_EnableIRQRequest(USART1_IRQn, 2);
@@ -259,20 +301,16 @@ void USART1_Init(void)
 *******************************************************************************/
 void ADC_setup(void)
 {
-  GPIO_Config_T gpioConfig;
-  ADC_Config_T  adcConfig;
-
-  /* RCM Enable*/
-  RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_ADC1);
-
   /* GPIO Configuration */
   gpioConfig.pin = ADC1_IN6_PIN;
   gpioConfig.mode = GPIO_MODE_AN;
   gpioConfig.pupd = GPIO_PUPD_PU;
   GPIO_Config(ADC1_IN6_PORT, &gpioConfig);
 
-  /* ADC Configuration */
-  ADC_Reset();
+  /* RCM Enable*/
+  RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_ADC1);
+
+  ADC_Config_T  adcConfig;
   ADC_ConfigStructInit(&adcConfig);
   /* Set resolution*/
   adcConfig.resolution = ADC_RESOLUTION_12B;
@@ -286,8 +324,8 @@ void ADC_setup(void)
   adcConfig.extTrigConv = ADC_EXT_TRIG_CONV_TRG0;
   /* Set TrigEdge*/
   adcConfig.extTrigEdge = ADC_EXT_TRIG_EDGE_NONE;
-
   ADC_Config(&adcConfig);
+
   ADC_ConfigChannel(ADC_CHANNEL_6, ADC_SAMPLE_TIME_1_5);
 
   /* Enable Interrupt*/
@@ -299,6 +337,7 @@ void ADC_setup(void)
 
   /* Enable ADC*/
   ADC_Enable();
+  APM_EVAL_DelayMs(3);   // 必要的延时
 }
 
 /*******************************************************************************
@@ -311,22 +350,20 @@ void ADC_setup(void)
 void DAC_setup(void)
 {
   /* DAC1 out PA4 pin configuration */
-  GPIO_Config_T  gpioConfig;
   GPIO_ConfigStructInit(&gpioConfig);
   gpioConfig.mode = GPIO_MODE_AN;
   gpioConfig.outtype = GPIO_OUT_TYPE_PP;
-  gpioConfig.speed = GPIO_SPEED_50MHz;
+  gpioConfig.speed = GPIO_SPEED_10MHz;
   gpioConfig.pupd = GPIO_PUPD_NO;
   gpioConfig.pin = DAC1_OUT_PIN;
   GPIO_Config(DAC1_OUT_PORT, &gpioConfig);
 
   // 1. 初始化 DAC 模块
-  // DAC_Reset();
   RCM_EnableAPB1PeriphClock(RCM_APB1_PERIPH_DAC);
 
   // 2. 配置 DAC 通道 1 的参数
   DAC_Config_T dacConfig;
-  // DAC_ConfigStructInit(&dacConfig);
+  DAC_ConfigStructInit(&dacConfig);
   dacConfig.trigger = DAC_TRIGGER_NONE;                   /*!< DAC trigger selection */
   dacConfig.waveGeneration = DAC_WAVE_GENERATION_NONE;    /*!< DAC output buffer disable */
   dacConfig.maskAmplitudeSelect = DAC_LFSRUNAMASK_BIT0;   /*!< DAC noise/triangle wave generation selection */
@@ -337,7 +374,8 @@ void DAC_setup(void)
   DAC_Enable(DAC_CHANNEL_1);
 
   // 4. （可选）配置 DAC 数据对齐方式和初始值
-  DAC_ConfigChannel1Data(DAC_ALIGN_12B_R, COMP_INVERTINGINPUT_TH_VOLT(1200));  // 示例中的 0x800 是 12 位数据的一半
+  // DAC_ConfigChannel1Data(DAC_ALIGN_12B_R, 0x800);  // 示例中的 0x800 是 12 位数据的一半
+  SET_DAC_INM(1200);
 }
 
 /*******************************************************************************
@@ -355,7 +393,6 @@ void ACMP_setup(void)
   /* Connect PA12 to COMP2_OUT */
   GPIO_ConfigPinAF(ACMP2_OUT_PORT, GPIO_PIN_SOURCE_12, GPIO_AF_PIN7);
 
-  GPIO_Config_T  gpioConfig;
   GPIO_ConfigStructInit(&gpioConfig);
   gpioConfig.pupd = GPIO_PUPD_PU;
   gpioConfig.speed = GPIO_SPEED_50MHz;
@@ -381,21 +418,17 @@ void ACMP_setup(void)
   gpioConfig.pin = ACMP2_INP_PIN;
   GPIO_Config(ACMP2_INP_PORT, &gpioConfig);
 
-  // 复位 COMP 模块
-  // COMP_Reset();
-
   // 配置 COMP
   COMP_Config_T compConfig;
   COMP_ConfigStructInit(&compConfig);  // 使用默认值初始化配置结构体
   compConfig.invertingInput = COMP_INVERTING_INPUT_IO;   /*!< 比较器反相输入选择 */
-  compConfig.output = COMP_OUTPUT_TIM2IC4;                  /*!< 比较器输出选择 */
+  compConfig.output = COMP_OUTPUT_SET;                  /*!< 比较器输出选择 */
   compConfig.outputPol = COMP_OUTPUTPOL_NONINVERTED;        /*!< 比较器输出极性 */
   compConfig.hysterrsis = COMP_HYSTERRSIS_NO;                /*!< 比较器迟滞 */
   compConfig.mode = COMP_MODE_HIGHSPEED;               /*!< Comparator mode */
   COMP_Config(COMP_SELECT_COMP1, &compConfig);
-
   compConfig.invertingInput = COMP_INVERTING_INPUT_IO;   /*!< 比较器反相输入选择 */
-  compConfig.output = COMP_OUTPUT_TIM2IC4;                  /*!< 比较器输出选择 */
+  compConfig.output = COMP_OUTPUT_SET;                  /*!< 比较器输出选择 */
   COMP_Config(COMP_SELECT_COMP2, &compConfig);
 
   // EINT_Config_T eintConfig;
@@ -416,5 +449,3 @@ void ACMP_setup(void)
   // COMP_Enable(COMP_SELECT_COMP2);
   COMP_Disable(COMP_SELECT_COMP2);
 }
-
-

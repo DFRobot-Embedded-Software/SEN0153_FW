@@ -1,6 +1,9 @@
-.\out\apm32f051\bsp_delay.o: ..\..\Source\bsp_delay.c
+.\out\apm32f051\bsp_delay.o: ..\..\Source\FUNCTION\bsp_delay.c
 .\out\apm32f051\bsp_delay.o: ..\..\Include\bsp_delay.h
 .\out\apm32f051\bsp_delay.o: ..\..\Include\main.h
+.\out\apm32f051\bsp_delay.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\out\apm32f051\bsp_delay.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\out\apm32f051\bsp_delay.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\out\apm32f051\bsp_delay.o: D:\Keil_v5\ARM\Pack\Geehy\APM32F0xx_DFP\1.0.9\Device\Device\Geehy\APM32F0xx\Include\apm32f0xx.h
 .\out\apm32f051\bsp_delay.o: ..\..\CMSIS\Include\core_cm0plus.h
 .\out\apm32f051\bsp_delay.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
