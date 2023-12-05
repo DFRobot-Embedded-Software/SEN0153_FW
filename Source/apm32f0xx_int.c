@@ -99,6 +99,25 @@ void SysTick_Handler(void)
 }
 
 /*!
+ * @brief       This function handles EINT0_1 interrupt Handler
+ *
+ * @param       None
+ *
+ * @retval      None
+ *
+ * @note
+ */
+void EINT4_15_IRQHandler(void)
+{
+  if (EINT_ReadStatusFlag(EINT_LINE7) == SET) {
+    EINT_ClearStatusFlag(EINT_LINE7);
+    // NVIC_SystemReset();
+    // USART1_Init();   // 初始化串口
+    LED_PORT->ODATA ^= LED_PIN;
+  }
+}
+
+/*!
  * @brief        This function handles TMR14 Handler
  *
  * @param        None
@@ -120,6 +139,7 @@ void TMR14_IRQHandler(void)
   }
 }
 
+__IO uint8_t InterruptCounter = 0x00;
 /*!
  * @brief        This function handles USART1 RX interrupt Handler
  *
@@ -131,7 +151,13 @@ void TMR14_IRQHandler(void)
  */
 void USART1_IRQHandler(void)
 {
-  if (USART_ReadStatusFlag(USART1, USART_FLAG_RXBNE) == SET) {
+  if (USART_ReadIntFlag(USART1, USART_INT_FLAG_WAKEUP) == SET)
+  { 
+    /* Clear The USART WU flag */  
+    USART_ClearIntFlag(USART1, USART_INT_FLAG_WAKEUP);
+    InterruptCounter = 0x01;
+  }
+  if (USART_ReadIntFlag(USART1, USART_INT_FLAG_RXBNE) == SET) {
     uint8_t Rev = (uint8_t)USART_RxData(USART1);
     if (revBuf.revEmptyFlag == TRUE) {
       revBuf.dataBuf[revBuf.revByteCounter] = Rev;
@@ -194,7 +220,7 @@ void TMR1_CC_IRQHandler(void)
       IRQ_Counter++;
     }
   }
-  
+
 }
 #else
 void TMR2_IRQHandler(void)
@@ -236,7 +262,7 @@ void TMR3_IRQHandler(void)
 {
   // if (TMR_ReadIntFlag(TMR3, TMR_INT_FLAG_CH1) == SET) {
   //   TMR_ClearIntFlag(TMR3, TMR_INT_FLAG_CH1);
-  //   printf("TMR3 = %u \r\n", TMR_ReadCaputer1(TMR3));
+  //   CUSTOM_DBG("TMR3 = %u \r\n", TMR_ReadCaputer1(TMR3));
   // }
   if (TMR_ReadIntFlag(TMR3, TMR_INT_FLAG_UPDATE) == SET) {
     TMR_ClearIntFlag(TMR3, TMR_INT_FLAG_UPDATE);
@@ -244,37 +270,37 @@ void TMR3_IRQHandler(void)
     if (shift_ch_CMD == TRUE) {
       switch (TIMER3_IF_Counter) {
       case  15: {
-        SET_DAC_INM(1200); Var_Sub = 28;
+        SET_DAC_INM_0(1200); Var_Sub = 28;   // 366.2 mV
       }break;
       case  16: {
-        SET_DAC_INM(1000); Var_Sub = 27;
+        SET_DAC_INM_0(1000); Var_Sub = 27;
       }break;
       case  17: {
-        SET_DAC_INM(800); Var_Sub = 26;
+        SET_DAC_INM_0(800); Var_Sub = 26;
       }break;
       case  18: {
-        SET_DAC_INM(600); Var_Sub = 26;
+        SET_DAC_INM_0(600); Var_Sub = 26;
       }break;
       case  19: {
-        SET_DAC_INM(500); Var_Sub = 25;
+        SET_DAC_INM_0(500); Var_Sub = 25;
       }break;
       case  21: {
-        SET_DAC_INM(400); Var_Sub = 25;
+        SET_DAC_INM_0(400); Var_Sub = 25;
       }break;
       case  22: {
-        SET_DAC_INM(300); Var_Sub = 24;
+        SET_DAC_INM_0(300); Var_Sub = 24;
       }break;
       case  23: {
-        SET_DAC_INM(200); Var_Sub = 24;
+        SET_DAC_INM_0(200); Var_Sub = 24;
       }break;
       case  24: {
-        SET_DAC_INM(150); Var_Sub = 23;
+        SET_DAC_INM_0(150); Var_Sub = 23;
       }break;
       case  28: {
-        SET_DAC_INM(100); Var_Sub = 23;
+        SET_DAC_INM_0(100); Var_Sub = 23;
       }break;
       case  31: {
-        SET_DAC_INM(80); Var_Sub = 23;
+        SET_DAC_INM_0(80); Var_Sub = 23;
       }break;
       case  36: {
         SET_DAC_INM(60); Var_Sub = 23;
@@ -283,70 +309,70 @@ void TMR3_IRQHandler(void)
         SET_DAC_INM(40); Var_Sub = 22;
       }break;
       case  80: {
-        SET_DAC_INM(20); Var_Sub = 21;
+        SET_DAC_INM(20); Var_Sub = 21;   // 6.1 mV
       }break;
 
       case 100: {
-        SET_DAC_INM(500); Var_Sub = 21;   // 152 mV
+        SET_DAC_INM_2(500); Var_Sub = 21;   // 152.6 mV
         // COMP_Disable(COMP_SELECT_COMP2);   // 模拟比较器2
-        // COMP_Enable(COMP_SELECT_COMP1);   // 开启模拟比较器1
+        COMP_Enable(COMP_SELECT_COMP1);   // 开启模拟比较器1
       }break;
       case 102: {
-        SET_DAC_INM(450); Var_Sub = 21;
+        SET_DAC_INM_2(450); Var_Sub = 21;
       }break;
       case 104: {
-        SET_DAC_INM(400); Var_Sub = 21;
+        SET_DAC_INM_2(400); Var_Sub = 21;
       }break;
       case 106: {
-        SET_DAC_INM(350); Var_Sub = 21;
+        SET_DAC_INM_2(350); Var_Sub = 21;
       }break;
       case 108: {
-        SET_DAC_INM(300); Var_Sub = 20;
+        SET_DAC_INM_2(300); Var_Sub = 20;
       }break;
       case 110: {
-        SET_DAC_INM(250); Var_Sub = 20;
+        SET_DAC_INM_2(250); Var_Sub = 20;
       }break;
       case 115: {
-        SET_DAC_INM(200); Var_Sub = 20;
+        SET_DAC_INM_2(200); Var_Sub = 20;
       }break;
       case 120: {
-        SET_DAC_INM(150); Var_Sub = 20;
+        SET_DAC_INM_2(150); Var_Sub = 20;
       }break;
       case 125: {
-        SET_DAC_INM(100); Var_Sub = 19;   // 30.5 mV
+        SET_DAC_INM_2(100); Var_Sub = 19;   // 30.5 mV
       }break;
       case 180: {
-        SET_DAC_INM(100); Var_Sub = 18;
+        SET_DAC_INM_2(100); Var_Sub = 18;
       }break;
       case 200: {
-        SET_DAC_INM(100); Var_Sub = 17;
+        SET_DAC_INM_2(100); Var_Sub = 17;
       }break;
       case 240: {
-        SET_DAC_INM(80); Var_Sub = 15;
+        SET_DAC_INM_2(80); Var_Sub = 15;
       }break;
       case 300: {
-        SET_DAC_INM(80); Var_Sub = 15;
+        SET_DAC_INM_2(80); Var_Sub = 15;
       }break;
       case 320: {
-        SET_DAC_INM(80); Var_Sub = 14;
+        SET_DAC_INM_2(80); Var_Sub = 14;
       }break;
       case 380: {
-        SET_DAC_INM(80); Var_Sub = 13;
+        SET_DAC_INM_2(80); Var_Sub = 13;
       }break;
       case 430: {
-        SET_DAC_INM(80); Var_Sub = 12;
+        SET_DAC_INM_2(80); Var_Sub = 12;
       }break;
       case 510: {
-        SET_DAC_INM(60); Var_Sub = 10;
+        SET_DAC_INM_2(60); Var_Sub = 10;
       }break;
       case 570: {
-        SET_DAC_INM(60); Var_Sub = 9;
+        SET_DAC_INM_2(60); Var_Sub = 9;
       }break;
       case 620: {
-        SET_DAC_INM(50); Var_Sub = 8;
+        SET_DAC_INM_2(50); Var_Sub = 8;
       }break;
       case 700: {
-        SET_DAC_INM(45); Var_Sub = 7;
+        SET_DAC_INM_2(45); Var_Sub = 7;
       }break;
       default:break;
       }

@@ -211,11 +211,11 @@ void GPIO_setup(void)
   gpioConfig.pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15;
   GPIO_Config(GPIOA, &gpioConfig);
   GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
-  GPIO_SetBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
-  GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10);
+  // GPIO_SetBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_15);
+  // GPIO_ClearBit(GPIOA, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10);
   gpioConfig.pin = GPIO_PIN_4;
   GPIO_Config(GPIOB, &gpioConfig);
-  GPIO_ClearBit(GPIOB, GPIO_PIN_4);
+  // GPIO_ClearBit(GPIOB, GPIO_PIN_4);
   GPIO_SetBit(GPIOB, GPIO_PIN_4);
 
   //-----LED端口配置
@@ -223,7 +223,6 @@ void GPIO_setup(void)
   gpioConfig.pin = LED_PIN;
   GPIO_Config(LED_PORT, &gpioConfig);
   GPIO_ClearBit(LED_PORT, LED_PIN);
-  // GPIO_SetBit(LED_PORT, LED_PIN);
 
   //-----温度测量端口配置
   gpioConfig.pin = TEMP_VCC_PIN;
@@ -233,7 +232,7 @@ void GPIO_setup(void)
   //-----运放供电端口配置
   gpioConfig.pin = OPA_VCC_PIN;
   GPIO_Config(OPA_VCC_PORT, &gpioConfig);
-  GPIO_ClearBit(OPA_VCC_PORT, OPA_VCC_PIN);
+  GPIO_SetBit(OPA_VCC_PORT, OPA_VCC_PIN);   // 运放断电
 
   //-----超声波探头驱动端口配置
   gpioConfig.pin = X_PIN;
@@ -268,7 +267,7 @@ void USART1_Init(void)
 
   /* Enable USART1 clock */
   RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_USART1);
-
+  // RCM_ConfigUSARTCLK(RCM_USART1CLK_HSI);
   USART_Config_T usartConfigStruct;
   /* USARTs configured as follow: */
   usartConfigStruct.baudRate = Baudrate;
@@ -291,8 +290,10 @@ void USART1_Init(void)
 
   NVIC_EnableIRQRequest(USART1_IRQn, 2);
 
+  // USART_ConfigStopModeWakeUpSource(USART1, USART_WAKEUP_SOURCE_START);
   /* Enable USART */
   USART_Enable(USART1);
+  // USART_EnableStopMode(USART1);
 }
 
 /***************************************************************************//**
@@ -375,7 +376,7 @@ void DAC_setup(void)
 
   // 4. （可选）配置 DAC 数据对齐方式和初始值
   // DAC_ConfigChannel1Data(DAC_ALIGN_12B_R, 0x800);  // 示例中的 0x800 是 12 位数据的一半
-  SET_DAC_INM(1200);
+  SET_DAC_INM_0(1200);
 }
 
 /*******************************************************************************

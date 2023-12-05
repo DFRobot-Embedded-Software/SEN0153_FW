@@ -27,6 +27,7 @@
 #include "main.h"
 #include "all_include.h"
 
+
 /*!
  * @brief       Main program
  *
@@ -55,16 +56,6 @@ int main(void)
 #if IAP_UART
   appFlagInit();
 #endif
-// GPIO_Config_T gpioConfig;
-  // GPIO_SetOutPP(DAC1_OUT_PORT, DAC1_OUT_PIN);
-  // GPIO_SetBit(DAC1_OUT_PORT, DAC1_OUT_PIN);
-  // GPIO_ClearBit(DAC1_OUT_PORT, DAC1_OUT_PIN);
-  // gpioConfig.mode = GPIO_MODE_AN;
-  // gpioConfig.outtype = GPIO_OUT_TYPE_PP;
-  // gpioConfig.speed = GPIO_SPEED_10MHz;
-  // gpioConfig.pupd = GPIO_PUPD_NO;
-  // gpioConfig.pin = DAC1_OUT_PIN;
-  // GPIO_Config(DAC1_OUT_PORT, &gpioConfig);
 
   APM_EVAL_TMR14_Init(500, 48);   // 0.5 ms
 
@@ -72,20 +63,51 @@ int main(void)
 
   GPIO_ClearBit(LED_PORT, LED_PIN);   // LED指示初始化完成
 
-  DAC_setup();
-  APM_EVAL_DelayMs(1000);
-  printf("SEN0153 URM07!\r\n");
+  // DAC_setup();
+  // APM_EVAL_DelayMs(1000);
+  CUSTOM_DBG("SEN0153 URM07!\r\n");
 
-  uint16_t dis = 0;
+  // 电源管理时钟初始化
+  // PMU_Reset();
+  RCM_EnableAPB1PeriphClock(RCM_APB1_PERIPH_PMU);
+
   while (1) {
-    dis = get_Dis();
-    printf("get_Dis() = %u\r\n\r\n", dis);
-    APM_EVAL_DelayMs(300);
+    // uint16_t dis = get_Dis();
+    // CUSTOM_DBG("get_Dis() = %u\r\n\r\n", dis);
+    // APM_EVAL_DelayMs(300);
     if (revBuf.revEmptyFlag == FALSE) {   // 否定  接收 buf 不为空
       TMR_Disable(TMR14);
       DF_Protocol_Parse();
       clear_RxMessage();   // 清空协议Buffer
     }
+    // GPIO_SetInputFloat()
+
+    /* Before entering the USART in STOP mode the REACK flag must be checked to ensure the USART RX is ready */
+  //   while (USART_ReadStatusFlag(USART1, USART_FLAG_RXENACKF) == RESET);
+  //   USART_EnableStopMode(USART1);
+  //   USART_EnableInterrupt(USART1, USART_INT_WAKEUP);
+
+    // APM_EVAL_DelayMs(1);
+  //   /* Enter Sleep Mode, and Wake up by interrupt*/
+    PMU_EnterSleepMode(PMU_SLEEPENTRY_WFI);
+  //   /* Enter STOP Mode in WFI*/
+  // RCM_DisableAPB2PeriphClock(RCM_APB2_PERIPH_SYSCFG);
+    // PMU_EnterSTOPMode(PMU_REGULATOR_LowPower, PMU_STOPENTRY_WFI);
+  // RCM_EnableAPB2PeriphClock(RCM_APB2_PERIPH_SYSCFG);
+  //   /* Clear flag bit to prevent repeated entry interrupt*/
+  //   // PMU_ClearStatusFlag(PMU_FLAG_STDBYF);
+  //   // PMU_ClearStatusFlag(PMU_FLAG_WUPF);
+  //   /* Enter StandBy Mode*/
+    // PMU_EnterSTANDBYMode();
+  //   /* reset System*/
+  //   // NVIC_SystemReset();
+
+  //   /* Waiting Wake Up interrupt */
+  //   while (InterruptCounter == 0x00);
+  //   USART_DisableStopMode(USART1);
+  //   // USART1_Init();   // 初始化串口
+  //   CUSTOM_DBG("4123456789!\r\n");
+    // CUSTOM_DBG("123456789!\r\n");
   }
 }
 

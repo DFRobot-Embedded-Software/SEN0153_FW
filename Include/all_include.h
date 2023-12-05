@@ -8,6 +8,16 @@
 #include "func.h"
 #include "flash.h"
 
+// #define ENABLE_DBG   //!< open this macro and you can see the details of the program
+#ifdef ENABLE_DBG
+#define CUSTOM_DBG printf
+#else
+#define CUSTOM_DBG(...)
+#endif
+
+/* printf using USART1  */
+#define DEBUG_USART           USART1
+
 #define THIS_USE_TMR1
 #ifdef THIS_USE_TMR1
 #define COMP_OUTPUT_SET   COMP_OUTPUT_TIM1IC1
@@ -21,8 +31,10 @@
 
 #define COMP_INVERTINGINPUT_TH_VOLT(x)   ( (uint16_t)((x) * 4096.0 / 3.3 ) )
 
+// 原: 一级: 56 / 1.8 + 1= 32; 二级: 100 / 1.8 + 1= 56.56
+// 现: 一级: (2, 4, 8, 16, 32)16; 二级: 47 / 0.68 + 1 = 70.12
 // #define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 0.3788 * 8) )   // 1250 / 3300
-#define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 1250 / 3300 * 3) )   // 1.25V 范围的 1200/4096
+#define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 1250 / 3300) )   // 1.25V 范围的 1200/4096
 // #define COMP_INPUT_TH(x)   ( (uint16_t)((x) * 4096.0 / 3300 ) )   // 1200 mV
 // #define COMP_INPUT_TH(x)   ( x )   // 1200
 
@@ -30,6 +42,9 @@
 // #define SET_DAC_INM(x)   
 #define SET_DAC_INM(x)   {DAC->DH12R1 = COMP_INPUT_TH(x);}
 // #define SET_DAC_INM(x)   {DAC->DH12R1 = x;}
+
+#define SET_DAC_INM_0(x)   {DAC->DH12R1 = COMP_INPUT_TH(x * 6);}
+#define SET_DAC_INM_2(x)   {DAC->DH12R1 = COMP_INPUT_TH(x / 2 / 56 * 70);}
 
 #define Baudrate_DEFAULT       19200
 #define device_Addr_DEFAULT    0x11
@@ -141,5 +156,7 @@ extern volatile uint16_t TIMERx_IF_Counter;
 extern volatile uint16_t TIMER3_IF_Counter;
 extern volatile uint16_t Distance;
 extern volatile uint8_t DisTrue_Flag;   // 距离获取正确的标志
+
+extern __IO uint8_t InterruptCounter;
 
 #endif /* __ALL_INCLUDE_H__ */

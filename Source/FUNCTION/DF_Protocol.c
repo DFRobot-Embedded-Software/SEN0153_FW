@@ -96,7 +96,7 @@ void Return_GetTemp(uint16_t Temperature_Val)
   RetMessage_t.get_Temp_RET.data[0] = Temperature_Val / 256;
   RetMessage_t.get_Temp_RET.data[1] = Temperature_Val % 256;
   RetMessage_t.get_Temp_RET.Checksum = Ret_Checksum_Cal(RetMessage_t);
-  printf("Temperature_Val = %d \r\n", (int16_t)Temperature_Val);
+  // CUSTOM_DBG("Temperature_Val = %d \r\n", (int16_t)Temperature_Val);
 
   USART_Write(RetMessage_t.Buffer, get_Temp_RET_numByte);
 }

@@ -146,8 +146,8 @@ uint16_t get_Dis(void)
   SetVs();   // 测量温度，计算声波速度
 
   DAC_setup();
-  // SET_DAC_INM(1200);
-  // APM_EVAL_DelayMs(100);
+  // SET_DAC_INM_0(1200);
+  APM_EVAL_DelayMs(10);
   GPIO_ClearBit(OPA_VCC_PORT, OPA_VCC_PIN);   // 运放供电
   ACMP_setup();   // 初始化模拟比较器
 
@@ -163,7 +163,7 @@ uint16_t get_Dis(void)
   TMR_Enable(TMR3);
   TMR_Enable(USE_TMRx);
 
-  while (TIMER3_IF_Counter < 14);
+  while (TIMER3_IF_Counter < 16);   // 14
   COMP_Enable(COMP_SELECT_COMP2);   // 开启模拟比较器2
   GPIO_SetInputFloat(X_PORT, X_PIN);   // 设置为输入, 接收回波
 
@@ -176,7 +176,6 @@ uint16_t get_Dis(void)
   } else {
     dis = 0xFFFF;//---------------------------------------------未检测到回波时输出0xFFFF
   }
-
   TMR_Reset(USE_TMRx);
   TMR_Reset(TMR3);
   DAC_Reset();
@@ -184,7 +183,7 @@ uint16_t get_Dis(void)
 
   GPIO_SetBit(OPA_VCC_PORT, OPA_VCC_PIN);   // 运放断电
 
-  printf("TIMER3_IF_Counter = %u\r\n", TIMER3_IF_Counter);
+  CUSTOM_DBG("TIMER3_IF_Counter = %u\r\n", TIMER3_IF_Counter);
   TIMERx_IF_Counter = 0;
   TIMER3_IF_Counter = 0;
 

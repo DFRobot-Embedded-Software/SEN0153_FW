@@ -48,12 +48,10 @@ extern "C" {
 #include "apm32f0xx_comp.h"
 #include "apm32f0xx_syscfg.h"
 #include "apm32f0xx_eint.h"
+#include "apm32f0xx_pmu.h"
 
 #include "bsp_delay.h"
 
-
-/* printf using USART1  */
-#define DEBUG_USART           USART1
 
 #define APP_CALI_ADDRESS      ((uint32_t)0x08001C00)
 #define APP_INFO_ADDRESS      ((uint32_t)0x08001C10)
@@ -64,7 +62,7 @@ extern "C" {
 #define DEVICE_HARD_VERSION   0x1000
 #define DEVICE_SOFT_VERSION   0x1000
   
-#define IAP_UART 0
+#define IAP_UART 1
 #if IAP_UART
 #define APPLICATION_ADDRESS   ((uint32_t)0x2000)
 #else
